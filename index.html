@@ -229,11 +229,9 @@
 
 <script>
 // =================== CONFIGURA ESTO ===================
-const AIO_USERNAME = "fabianpeltro";
-const AIO_FEED_KEY  = "radar";
-// El feed debe estar marcado como "público" en io.adafruit.com
-// para que esta página pueda leerlo sin ninguna clave secreta.
-// ========================================================
+// Ya NO se necesita ninguna clave secreta aquí. Un GitHub Action se encarga
+// de hablar con Adafruit IO de forma segura y dejar los datos en data.json.
+// =========================================================
 
 const POLL_MS = 5000;
 const MAX_RANGE_M = 12;       // metros representados en el anillo exterior
@@ -375,7 +373,7 @@ function renderList(){
 
 async function fetchLatest(){
   try {
-    const url = `https://io.adafruit.com/api/v2/${AIO_USERNAME}/feeds/${AIO_FEED_KEY}/data/last`;
+    const url = `./data.json?_=${Date.now()}`; // cache-busting
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
