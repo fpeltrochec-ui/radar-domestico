@@ -1,0 +1,36 @@
+name: Sincronizar datos del radar
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Pedir el último dato a Adafruit IO
+        env:
+          AIO_KEY: ${{ secrets.AIO_KEY }}
+          AIO_USERNAME: fabianpeltro
+          AIO_FEED_KEY: radar
+        run: |
+          curl -s -H "X-AIO-Key: $AIO_KEY" \
+            "https://io.adafruit.com/api/v2/$AIO_USERNAME/feeds/$AIO_FEED_KEY/data/last" \
+            -o data.json
+          echo "Contenido descargado:"
+          cat data.json
+
+      - name: Publicar data.json si cambió
+        run: |
+          git config user.name "radar-bot"
+          git config user.email "actions@github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "Actualizar datos del radar"
+          git push
